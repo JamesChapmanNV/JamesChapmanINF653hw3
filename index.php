@@ -1,19 +1,8 @@
+<?php require('database.php')?>
+
 <?php
-require('database.php');
-
-
-$query = 'SELECT A.customerID, emailAddress, firstName, lastName, line1, city, state, zipCode, phone
-FROM addresses AS A 
-INNER JOIN customers AS C
-ON A.customerID = C.customerID
-GROUP BY customerID, emailAddress, firstName, lastName, line1, city, state, zipCode, phone';// PUT YOUR SQL QUERY HERE
-// Example: $query = 'SELECT * FROM customers';
-
-$statement = $db->prepare($query);
-$statement->execute();
-$customers = $statement->fetchAll();
-$statement->closeCursor(); 
-
+$newToDoTitle = filter_input(INPUT_POST, "newToDoTitle", FILTER_SANITIZE_STRING);
+$Description = filter_input(INPUT_POST, "Description", FILTER_SANITIZE_STRING);
 ?>
 
 <!DOCTYPE html>
@@ -21,31 +10,69 @@ $statement->closeCursor();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Guitar Shop Customers</title>
-    <link rel="stylesheet" href="css/main.css">
+    <title>My ToDo List</title>
+    <link rel="stylesheet" href="css/main.css" />
 </head>
 
-<!-- the body section -->
 <body>
-    <header><h1>Customer List</h1></header>
-    <main>
-        <section>
-            <?php foreach ($customers as $customer) : ?>
-                <p><span class="bold">CustID:</span> <?php echo $customer['customerID']; ?></p>
-                <p><span class="bold">Email:</span> <?php echo $customer['emailAddress']; ?></p>
-                <p><span class="bold">FirstName:</span> <?php echo $customer['firstName']; ?></p>
-                <p><span class="bold">LastName:</span> <?php echo $customer['lastName']; ?></p>
-                <p><span class="bold">Address:</span> <?php echo $customer['line1']; ?></p>
-                <p><span class="bold">City:</span> <?php echo $customer['city']; ?></p>
-                <p><span class="bold">State:</span> <?php echo $customer['state']; ?></p>
-                <p><span class="bold">ZipCode:</span> <?php echo $customer['zipCode']; ?></p>
-                <p><span class="bold">Phone:</span> <?php echo $customer['phone']; ?></p>
-                <br>
-            <?php endforeach; ?>
-        </section>
+<main>
+    <header><h1>ToDo List</h1></header>
+    <?php 
+    if($newToDoTitle) { 
+        $query = 'INSERT INTO todoitems (Title, Description)
+                    VALUES (:newToDoTitle, :Description)';
+        $statement = $db->prepare($query);
+        $statement->bindValue(':newToDoTitle', $newToDoTitle);
+        $statement->bindValue(':Description', $Description);
+        $statement->execute();
+        $statement->closeCursor();
+    } 
+    ?>
+    <?php
+        $query = 'SELECT * FROM todoitems';
+        $statement = $db->prepare($query);
+        $statement->execute();
+        $todos = $statement->fetchAll();
+        $statement->closeCursor(); 
+    ?>
+    <?php 
+    if(empty($todos)) { ?>
+
+        <p> No to do list items exist yet.<BR>Add some below!</p>
+        
+    <?php } else { ?>
+    <section>
+        <?php foreach ($todos as $todo) : ?>
+            <div style="border-bottom: 1px solid #000;">
+            <?php echo "<p class='bold'> {$todo['Title']} </p>"; ?>
+            <?php echo $todo['Description']; ?>
+            <form style="float: right;" class='button' 
+                action="delete_todo.php" method="POST">
+                <input type="hidden" name="item_num"
+                    value="<?php echo $todo['ItemNum']; ?>"> 
+                <input type="submit" value="Delete">
+            </form>
+            </div>
+        <?php endforeach; ?>
+
+    </section>
+    <?php } ?>
+    
+    <section>
+    <h2>Add Item</h2>
+    <form action="<?php echo $_SERVER['PHP_SELF']?>"method="POST">
+        <label for="newToDoTitle"></label>
+        <input type="text" id="newToDoTitle" name="newToDoTitle" placeholder="Title" required>
+        <br>
+        <label for="Description"></label>
+        <input type="text" id="Description" name="Description" placeholder="Description" required>
+        <button>Add Item</button>
+    </form>
+    </section>
+
     </main>
     <footer>
-        <p>&copy; <?php echo date("Y"); ?> My Guitar Shop, Inc.</p>
+        <p>&copy; <?php echo date("Y"); ?> My ToDo List, Inc.</p>
     </footer>
 </body>
 </html>

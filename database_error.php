@@ -3,13 +3,13 @@
 
 <!-- the head section -->
 <head>
-    <title>My Guitar Shop</title>
-    <link rel="stylesheet" type="text/css" href="main.css" />
+    <title>My ToDo List</title>
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 
 <!-- the body section -->
 <body>
-    <header><h1>My Guitar Shop</h1></header>
+    <header><h1>ToDo List</h1></header>
 
     <main>
         <h1>Database Error</h1>
@@ -21,7 +21,7 @@
     </main>
 
     <footer>
-        <p>&copy; <?php echo date("Y"); ?> My Guitar Shop, Inc.</p>
+        <p>&copy; <?php echo date("Y"); ?>My ToDo List, Inc.</p>
     </footer>
 </body>
 </html>
